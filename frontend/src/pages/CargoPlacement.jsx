@@ -3,100 +3,53 @@ import {
   Box,
   Button,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Modal,
   TextField,
   IconButton,
+  Tabs,
+  Tab,
+  useMediaQuery,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import AddIcon from "@mui/icons-material/Add";
 
-
 export default function CargoPlacement() {
-  const [file, setFile] = useState(null);
-  const [placements, setPlacements] = useState([]);
-  const [rearrangements, setRearrangements] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // ✅ Detect Mobile Screens
 
   // State for modals
   const [openZoneModal, setOpenZoneModal] = useState(false);
   const [openItemModal, setOpenItemModal] = useState(false);
 
-  // Handles file selection
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-  };
-
-  // Handles file upload and API call
-  const handleUpload = async () => {
-    if (!file) {
-      setError("Please upload a CSV file.");
-      return;
-    }
-
-    setError("");
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("http://localhost:8000/api/placement", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setPlacements(data.placements);
-        setRearrangements(data.rearrangements);
-      } else {
-        setError("Failed to get placement recommendations.");
-      }
-    } catch (err) {
-      setError("Error uploading file.");
-    }
-
-    setLoading(false);
-  };
+  // State for tab selection (Manual Entry or CSV Upload)
+  const [zoneMode, setZoneMode] = useState(0);
+  const [itemMode, setItemMode] = useState(0);
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" align="center" gutterBottom>
         Cargo Placement
       </Typography>
 
-      {/* File Upload Section */}
-      <input type="file" accept=".csv" onChange={handleFileChange} />
-      <Button
-        variant="contained"
-        startIcon={<UploadFileIcon />}
-        onClick={handleUpload}
-        sx={{ ml: 2 }}
-        disabled={loading}
+      {/* ✅ Centered Containers */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row", // ✅ Stack on mobile
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 3,
+          mt: 2,
+        }}
       >
-        {loading ? "Uploading..." : "Upload and Process"}
-      </Button>
-
-      {error && <Typography color="error">{error}</Typography>}
-
-      {/* Two Small Containers for Add Zone & Add Items */}
-      <Box sx={{ display: "flex", gap: 3, mt: 3 }}>
         {/* Add Zone Container */}
         <Box
           onClick={() => setOpenZoneModal(true)}
           sx={{
-            width: 150,
-            height: 150,
+            width: 160,
+            height: 160,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -117,8 +70,8 @@ export default function CargoPlacement() {
         <Box
           onClick={() => setOpenItemModal(true)}
           sx={{
-            width: 150,
-            height: 150,
+            width: 160,
+            height: 160,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -136,7 +89,7 @@ export default function CargoPlacement() {
         </Box>
       </Box>
 
-      {/* Add Zone Modal */}
+      {/* ✅ Add Zone Modal */}
       <Modal open={openZoneModal} onClose={() => setOpenZoneModal(false)}>
         <Box
           sx={{
@@ -144,25 +97,53 @@ export default function CargoPlacement() {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: isMobile ? "90%" : 450,
+            maxHeight: "80vh",
+            overflowY: "auto",
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
             borderRadius: 2,
+            "&::-webkit-scrollbar": { display: "none" }, 
+            scrollbarWidth: "none",
           }}
         >
           <Typography variant="h6" gutterBottom>
             Add New Zone
           </Typography>
-          <TextField fullWidth label="Zone Name" variant="outlined" sx={{ mb: 2 }} />
-          <TextField fullWidth label="Zone Capacity" variant="outlined" sx={{ mb: 2 }} />
-          <Button variant="contained" onClick={() => setOpenZoneModal(false)}>
-            Save Zone
-          </Button>
+
+          <Tabs value={zoneMode} onChange={(e, newValue) => setZoneMode(newValue)}>
+            <Tab label="Manual Entry" />
+            <Tab label="CSV Upload" />
+          </Tabs>
+
+          <Box sx={{ mt: 2 }}>
+            {zoneMode === 0 && (
+              <Box>
+                <TextField fullWidth label="Zone Name" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Container ID" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Width (cm)" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Depth (cm)" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Height (cm)" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <Button variant="contained" onClick={() => setOpenZoneModal(false)}>
+                  Save Zone
+                </Button>
+              </Box>
+            )}
+
+            {zoneMode === 1 && (
+              <Box>
+                <input type="file" accept=".csv" />
+                <Button variant="contained" startIcon={<UploadFileIcon />} sx={{ mt: 2 }}>
+                  Upload CSV
+                </Button>
+              </Box>
+            )}
+          </Box>
         </Box>
       </Modal>
 
-      {/* Add Item Modal */}
+      {/* ✅ Add Item Modal */}
       <Modal open={openItemModal} onClose={() => setOpenItemModal(false)}>
         <Box
           sx={{
@@ -170,58 +151,56 @@ export default function CargoPlacement() {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: isMobile ? "90%" : 450,
+            maxHeight: "80vh",
+            overflowY: "auto",
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
             borderRadius: 2,
+            "&::-webkit-scrollbar": { display: "none" }, 
+            scrollbarWidth: "none",
           }}
         >
           <Typography variant="h6" gutterBottom>
             Add New Item
           </Typography>
-          <TextField fullWidth label="Item Name" variant="outlined" sx={{ mb: 2 }} />
-          <TextField fullWidth label="Item Size" variant="outlined" sx={{ mb: 2 }} />
-          <Button variant="contained" onClick={() => setOpenItemModal(false)}>
-            Save Item
-          </Button>
+
+          <Tabs value={itemMode} onChange={(e, newValue) => setItemMode(newValue)}>
+            <Tab label="Manual Entry" />
+            <Tab label="CSV Upload" />
+          </Tabs>
+
+          <Box sx={{ mt: 2 }}>
+            {itemMode === 0 && (
+              <Box>
+                <TextField fullWidth label="Item ID" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Name" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Width (cm)" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Depth (cm)" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Height (cm)" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Mass (kg)" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Priority (1-100)" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Expiry Date" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Usage Limit" type="number" variant="outlined" sx={{ mb: 2 }} />
+                <TextField fullWidth label="Preferred Zone" variant="outlined" sx={{ mb: 2 }} />
+                <Button variant="contained" onClick={() => setOpenItemModal(false)}>
+                  Save Item
+                </Button>
+              </Box>
+            )}
+
+            {itemMode === 1 && (
+              <Box>
+                <input type="file" accept=".csv" />
+                <Button variant="contained" startIcon={<UploadFileIcon />} sx={{ mt: 2 }}>
+                  Upload CSV
+                </Button>
+              </Box>
+            )}
+          </Box>
         </Box>
       </Modal>
-
-      {/* Suggested Placements Table */}
-      {placements.length > 0 && (
-        <>
-          <Typography variant="h6" mt={3}>
-            Suggested Placements
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Item ID</TableCell>
-                  <TableCell>Container</TableCell>
-                  <TableCell>Start Coordinates (W, D, H)</TableCell>
-                  <TableCell>End Coordinates (W, D, H)</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {placements.map((placement, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{placement.itemId}</TableCell>
-                    <TableCell>{placement.containerId}</TableCell>
-                    <TableCell>
-                      ({placement.position.startCoordinates.width}, {placement.position.startCoordinates.depth}, {placement.position.startCoordinates.height})
-                    </TableCell>
-                    <TableCell>
-                      ({placement.position.endCoordinates.width}, {placement.position.endCoordinates.depth}, {placement.position.endCoordinates.height})
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </>
-      )}
     </Box>
   );
 }
