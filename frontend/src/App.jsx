@@ -1,6 +1,7 @@
 import React, { useState, createContext } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import Sidebar, { Header } from "./components/Sidebar";
+import Sidebar from "./components/Sidebar";
+import  Header  from "./components/Header";
 import Dashboard from "./pages/Dashboard";
 import CargoPlacement from "./pages/CargoPlacement";
 import ItemRetrieval from "./pages/ItemRetrieval";
@@ -10,31 +11,21 @@ import TimeSimulation from "./pages/TimeSimulation";
 import LogsReports from "./pages/LogsReports";
 import ImportExport from "./pages/ImportExport";
 import AdminPanel from "./pages/AdminPanel";
-import { Box, CssBaseline, Toolbar, ThemeProvider, createTheme } from "@mui/material";
+import { Box, CssBaseline, Toolbar, ThemeProvider, createTheme, useMediaQuery } from "@mui/material";
 
-export const ThemeContext = createContext(); 
+export const ThemeContext = createContext();
 
 const drawerWidth = 240;
 
 function App() {
   const [open, setOpen] = useState(true);
-  const [darkMode, setDarkMode] = useState(false); 
+  const [darkMode, setDarkMode] = useState(false);
   const toggleDrawer = () => setOpen(!open);
   const toggleTheme = () => setDarkMode(!darkMode);
 
   const theme = createTheme({
     palette: {
       mode: darkMode ? "dark" : "light",
-      primary: {
-        main: darkMode ? "#90caf9" : "#1976d2",
-      },
-      background: {
-        default: darkMode ? "#121212" : "#f4f4f4",
-        paper: darkMode ? "#1e1e1e" : "#fff",
-      },
-      text: {
-        primary: darkMode ? "#fff" : "#000",
-      },
     },
   });
 
@@ -46,16 +37,7 @@ function App() {
           <Header toggleDrawer={toggleDrawer} />
           <Box display="flex">
             <Sidebar open={open} toggleDrawer={toggleDrawer} />
-            <Box
-              component="main"
-              sx={{
-                flexGrow: 1,
-                p: 3,
-                mt: 8,
-                ml: open ? `${drawerWidth}px` : "60px",
-                transition: "margin-left 0.3s ease",
-              }}
-            >
+            <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8, transition: "margin-left 0.3s ease" }}>
               <Toolbar />
               <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" />} />
