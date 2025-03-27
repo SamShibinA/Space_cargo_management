@@ -16,26 +16,24 @@ const storageZones = {
   "Emergency Storage": { id: "contJ" },
 };
 
-
 const Rearrangement = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p:0.1 }}>
       <Typography variant="h4" align="center" gutterBottom>
         Storage Zones
       </Typography>
       <Typography align="center">Select a zone to view its details.</Typography>
 
-      {/* ✅ Storage Zones in Flexbox Layout */}
+      {/* Storage Zones in Grid Layout */}
       <Box
         sx={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          justifyContent: "center",
-          alignItems: "center",
+          display: "grid",
+          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(6, 1fr)",
           gap: 3,
           mt: 3,
         }}
@@ -45,17 +43,17 @@ const Rearrangement = () => {
             key={zone}
             onClick={() => navigate(`/zone/${zone}`)}
             sx={{
-              width: 160,
               height: 160,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              border: "2px dashed #1976d2", // ✅ Proper Dashed Border
-              borderRadius: "12px", // ✅ Softer rounded corners
+              border: "2px dashed #1976d2",
+              borderRadius: "12px",
               cursor: "pointer",
               "&:hover": { backgroundColor: "rgba(25, 118, 210, 0.1)" },
               transition: "0.3s ease-in-out",
+              padding: 2,
             }}
           >
             <Typography variant="h6" fontWeight="bold">{zone}</Typography>
