@@ -1,35 +1,53 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, useMediaQuery } from "@mui/material";
+import { Box, Typography, useMediaQuery, CircularProgress, Alert } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-
-const storageZones = {
-  "Crew Quarters": { id: "contA" },
-  "Airlock": { id: "contB" },
-  "Medical Bay": { id: "contC" },
-  "Laboratory": { id: "contD" },
-  "Engineering": { id: "contE" },
-  "Command Center": { id: "contF" },
-  "Sanitation": { id: "contG" },
-  "Storage Bay 1": { id: "contH" },
-  "Storage Bay 2": { id: "contI" },
-  "Emergency Storage": { id: "contJ" },
-};
+import { fetchZones } from "../api/cargoApi";
 
 const Rearrangement = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const [zones, setZones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadZones = async () => {
+      try {
+        const data = await fetchZones();
+        setZones(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadZones();
+  }, []);
+
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+      <CircularProgress />
+    </Box>
+  );
+
+  if (error) return (
+    <Box sx={{ mt: 4 }}>
+      <Alert severity="error">{error}</Alert>
+    </Box>
+  );
 
   return (
-    <Box sx={{ p:0.1 }}>
+    <Box sx={{ p: 2 }}>
       <Typography variant="h4" align="center" gutterBottom>
         Storage Zones
       </Typography>
-      <Typography align="center">Select a zone to view its details.</Typography>
+      <Typography align="center" paragraph>
+        Select a zone to view its details.
+      </Typography>
 
-      {/* Storage Zones in Grid Layout */}
       <Box
         sx={{
           display: "grid",
@@ -38,10 +56,10 @@ const Rearrangement = () => {
           mt: 3,
         }}
       >
-        {Object.keys(storageZones).map((zone) => (
+        {zones.map((zone) => (
           <Box
-            key={zone}
-            onClick={() => navigate(`/zone/${zone}`)}
+            key={zone._id}
+            onClick={() => navigate(`/zone/${zone.zoneName}`)}
             sx={{
               height: 160,
               display: "flex",
@@ -56,9 +74,12 @@ const Rearrangement = () => {
               padding: 2,
             }}
           >
-            <Typography variant="h6" fontWeight="bold">{zone}</Typography>
+            <Typography variant="h6" fontWeight="bold">{zone.zoneName}</Typography>
             <Typography variant="body2" color="text.secondary">
-              ID: {storageZones[zone].id}
+              ID: {zone.containerId}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {zone.width}×{zone.depth}×{zone.height} cm
             </Typography>
           </Box>
         ))}
