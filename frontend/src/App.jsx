@@ -4,10 +4,8 @@ import Sidebar from "./components/Sidebar";
 import  Header  from "./components/Header";
 import Dashboard from "./pages/Dashboard";
 import CargoPlacement from "./pages/CargoPlacement";
-import ItemRetrieval from "./pages/ItemRetrieval";
 import Rearrangement from "./pages/Rearrangement";
 import WasteManagement from "./pages/WasteManagement";
-import TimeSimulation from "./pages/TimeSimulation";
 import LogsReports from "./pages/LogsReports";
 import ImportExport from "./pages/ImportExport";
 import AdminPanel from "./pages/AdminPanel";
@@ -43,10 +41,8 @@ function App() {
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/cargo-placement" element={<CargoPlacement />} />
-                <Route path="/item-retrieval" element={<ItemRetrieval />} />
                 <Route path="/rearrangement" element={<Rearrangement />} />
                 <Route path="/waste-management" element={<WasteManagement />} />
-                <Route path="/time-simulation" element={<TimeSimulation />} />
                 <Route path="/logs-reports" element={<LogsReports />} />
                 <Route path="/import-export" element={<ImportExport />} />
                 <Route path="/admin-panel" element={<AdminPanel />} />

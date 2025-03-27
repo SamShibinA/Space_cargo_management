@@ -5,10 +5,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ThemeContext } from "../App";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import StorageIcon from "@mui/icons-material/Storage";
-import SearchIcon from "@mui/icons-material/Search";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ScheduleIcon from "@mui/icons-material/Schedule";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -18,10 +16,8 @@ const drawerWidth = 240;
 const NAVIGATION = [
   { title: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
   { title: "Cargo Placement", icon: <StorageIcon />, path: "/cargo-placement" },
-  { title: "Item Search & Retrieval", icon: <SearchIcon />, path: "/item-retrieval" },
   { title: "Rearrangement Optimization", icon: <SwapHorizIcon />, path: "/rearrangement" },
   { title: "Waste Management", icon: <DeleteIcon />, path: "/waste-management" },
-  { title: "Time Simulation", icon: <ScheduleIcon />, path: "/time-simulation" },
   { title: "Logs & Reports", icon: <ListAltIcon />, path: "/logs-reports" },
   { title: "Import/Export", icon: <ImportExportIcon />, path: "/import-export" },
   { title: "Admin Panel", icon: <AdminPanelSettingsIcon />, path: "/admin-panel" },
