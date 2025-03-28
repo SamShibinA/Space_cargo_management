@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Button } from "@mui/material";
-import "./waste/waste.css";
+import { Container, Typography } from "@mui/material";
 import deleteIcon from "../assets/delete.svg";
 
 const WasteManagement = () => {
@@ -33,6 +32,60 @@ const WasteManagement = () => {
 
   return (
     <Container maxWidth={false} style={{ padding: "20px" }}>
+      <style>
+        {`
+          .full-width-table {
+            width: 100%;
+            overflow-x: auto;
+          }
+          .responsive-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+          }
+          .responsive-table thead {
+            background-color: rgb(54, 105, 215);
+            color: white;
+          }
+          .responsive-table th, .responsive-table td {
+            border: 1px solid rgb(208, 218, 227);
+            text-align: center;
+            padding: 12px;
+          }
+          .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+          }
+          .delete-icon {
+            width: 20px;
+            height: 20px;
+          }
+          @media (max-width: 768px) {
+            .responsive-table thead {
+              display: none;
+            }
+            .responsive-table tr {
+              display: block;
+              margin-bottom: 15px;
+              border: 1px solid #ddd;
+            }
+            .responsive-table td {
+              display: block;
+              text-align: right;
+              padding: 8px;
+              position: relative;
+            }
+            .responsive-table td::before {
+              content: attr(data-label);
+              position: absolute;
+              left: 10px;
+              text-align: left;
+              font-weight: bold;
+            }
+          }
+        `}
+      </style>
       <Typography variant="h4" align="center">
         Waste Management
       </Typography>
