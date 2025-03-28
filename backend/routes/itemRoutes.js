@@ -43,4 +43,53 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     });
 });
 
+
+// Add these new routes at the bottom, before module.exports
+const isExpired = (expiryDate) => {
+  if (!expiryDate) return false;
+  
+  const [year, month, day] = expiryDate.split('/');
+  const expiry = new Date(year, month - 1, day); // month is 0-indexed
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return expiry < today;
+};
+
+// Get expired items
+router.get('/waste', async (req, res) => {
+  try {
+    const items = await Item.find({});
+    
+    // Always return an array, even if empty
+    const wasteItems = items.filter(item => isExpired(item.expiryDate))
+      .map(item => ({
+        id: item._id.toString(),
+        itemId: item.itemId,
+        containerId: item.preferredZone || 'Unassigned',
+        itemname: item.name,
+        ExpDate: item.expiryDate,
+        reason: 'Expired'
+      }));
+
+    // Ensure we always return an array
+    res.status(200).json(Array.isArray(wasteItems) ? wasteItems : []);
+    
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json([]); // Return empty array on error
+  }
+});
+
+// Delete endpoint remains the same
+router.delete('/waste/:id', async (req, res) => {
+  try {
+    await Item.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Delete failed' });
+  }
+});
+
+
 module.exports = router;
