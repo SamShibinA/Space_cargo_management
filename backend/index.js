@@ -5,6 +5,7 @@ const cors = require("cors");
 
 const zoneRoutes = require("./routes/zoneRoutes");
 const itemRoutes = require("./routes/itemRoutes");
+const logRoutes = require("./routes/logRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -22,5 +23,6 @@ mongoose
 // Routes
 app.use("/api/zones", zoneRoutes);
 app.use("/api/items", itemRoutes);
+app.use("/api/logs", logRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

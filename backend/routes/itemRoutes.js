@@ -96,4 +96,32 @@ router.delete('/waste/:id', async (req, res) => {
   }
 });
 
+router.post("/", async (req, res) => {
+  try {
+    const newItem = new Item(req.body);
+    await newItem.save();
+
+    // Create a log entry
+    const logEntry = new Log({
+      user: req.user?.id || "system", // Assuming you have user auth
+      action: "creation",
+      item: newItem.itemId,
+      zone: newItem.preferredZone || "Unassigned",
+      details: {
+        name: newItem.name,
+        dimensions: {
+          width: newItem.width,
+          depth: newItem.depth,
+          height: newItem.height,
+        },
+      },
+    });
+    await logEntry.save();
+
+    res.status(201).json(newItem);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 module.exports = router;
