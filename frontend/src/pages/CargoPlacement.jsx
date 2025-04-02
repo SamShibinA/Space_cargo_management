@@ -197,6 +197,7 @@ export default function CargoPlacement() {
   };
 
   // Function to save Item
+  // 
   const handleSaveItem = async () => {
     setError("");
     if (!validateItemForm()) return;
@@ -205,7 +206,8 @@ export default function CargoPlacement() {
     const submissionData = {
       ...itemData,
       expiryDate: itemData.expiryDate === "N/A" ? null : itemData.expiryDate,
-      preferredZone: itemData.preferredZone === "" ? null : itemData.preferredZone
+      preferredZone:
+        itemData.preferredZone === "" ? null : itemData.preferredZone,
     };
 
     try {
@@ -214,8 +216,20 @@ export default function CargoPlacement() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData),
       });
-      
+
       if (response.ok) {
+        // Create a log entry
+        await fetch("http://localhost:8000/api/logs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: "System", // or get actual user from auth
+            action: "placement",
+            item: itemData.itemId,
+            zone: itemData.preferredZone || "Unassigned",
+          }),
+        });
+
         alert("Item added successfully!");
         setOpenItemModal(false);
         setItemData({
