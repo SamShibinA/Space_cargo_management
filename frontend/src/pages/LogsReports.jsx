@@ -179,8 +179,7 @@ const LogsReports = () => {
         >
           <TableHead>
             <TableRow>
-              {["User", "Action", "Item", "Zone", "Timestamp", "Actions"].map(
-                (header) => (
+              {["User", "Action", "Item", "Zone", "Timestamp", "Actions"].map((header) => (
                   <TableCell
                     key={header}
                     sx={{
