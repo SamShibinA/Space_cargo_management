@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -18,68 +18,64 @@ import {
   InputLabel,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useMediaQuery,
 } from "@mui/material";
-import {
-  Search,
-  FileDownload,
-  Refresh,
-  Visibility,
-  Delete,
-} from "@mui/icons-material";
-import { saveAs } from "file-saver";
-
-const sampleLogs = [
-  {
-    id: 1,
-    user: "User1",
-    action: "placement",
-    item: "ItemA",
-    zone: "Zone1",
-    timestamp: "2025-03-27 12:00",
-  },
-  {
-    id: 2,
-    user: "User2",
-    action: "retrieval",
-    item: "ItemB",
-    zone: "Zone2",
-    timestamp: "2025-03-27 13:00",
-  },
-  {
-    id: 3,
-    user: "User3",
-    action: "rearrangement",
-    item: "ItemC",
-    zone: "Zone3",
-    timestamp: "2025-03-27 14:00",
-  },
-];
+import { Visibility } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 
 const LogsReports = () => {
-  const [logs, setLogs] = useState(sampleLogs);
+  const [logs, setLogs] = useState([]);
+  const [originalLogs, setOriginalLogs] = useState([]);
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
     itemId: "",
-    userId: "",
     actionType: "",
   });
+  const [selectedLog, setSelectedLog] = useState(null);
+  const [openViewDialog, setOpenViewDialog] = useState(false);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const fetchLogs = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/logs");
+      if (response.ok) {
+        const data = await response.json();
+        setLogs(data);
+        setOriginalLogs(data);
+      }
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    }
+  };
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   const applyFilters = () => {
-    const filteredLogs = sampleLogs.filter((log) => {
+    const filteredLogs = originalLogs.filter((log) => {
       const matchesDate =
-        (!filters.startDate || log.timestamp >= filters.startDate) &&
-        (!filters.endDate || log.timestamp <= filters.endDate + " 23:59:59");
+        (!filters.startDate ||
+          new Date(log.timestamp) >= new Date(filters.startDate)) &&
+        (!filters.endDate ||
+          new Date(log.timestamp) <= new Date(filters.endDate + " 23:59:59"));
       const matchesItem = !filters.itemId || log.item.includes(filters.itemId);
-      const matchesUser = !filters.userId || log.user.includes(filters.userId);
       const matchesAction =
         !filters.actionType || log.action === filters.actionType;
 
-      return matchesDate && matchesItem && matchesUser && matchesAction;
+      return matchesDate && matchesItem && matchesAction;
     });
 
     setLogs(filteredLogs);
@@ -90,66 +86,49 @@ const LogsReports = () => {
       startDate: "",
       endDate: "",
       itemId: "",
-      userId: "",
       actionType: "",
     });
-    setLogs(sampleLogs);
+    setLogs(originalLogs);
   };
 
-  const downloadLogs = () => {
-    const csvContent = [
-      ["ID", "User", "Action", "Item", "Zone", "Timestamp"],
-      ...logs.map((log) => [
-        log.id,
-        log.user,
-        log.action,
-        log.item,
-        log.zone,
-        log.timestamp,
-      ]),
-    ]
-      .map((e) => e.join(","))
-      .join("\n");
-    saveAs(new Blob([csvContent], { type: "text/csv" }), "logs.csv");
-  };
-
-  const handleDeleteLog = (id) => {
-    setLogs(logs.filter((log) => log.id !== id));
+  const handleView = (log) => {
+    setSelectedLog(log);
+    setOpenViewDialog(true);
   };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-        <Typography variant="h4">Cargo Logs</Typography>
-        <Box>
-          <Button
-            variant="contained"
-            startIcon={<FileDownload />}
-            onClick={downloadLogs}
-            sx={{ mr: 2 }}
-          >
-            Export
-          </Button>
-          <Tooltip title="Refresh">
-            <IconButton
-              color="primary"
-              sx={{ borderRadius: "8px", p: 1 }}
-              onClick={resetFilters}
-            >
-              <Refresh />
-            </IconButton>
-          </Tooltip>
-        </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4" textAlign={isMobile ? "center" : "left"}>
+          Cargo Logs
+        </Typography>
       </Box>
 
-      <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: 2,
+          mb: 3,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
         <TextField
           label="Start Date"
           type="date"
           name="startDate"
           value={filters.startDate}
           onChange={handleFilterChange}
-          sx={{ width: 180 }}
+          sx={{ width: isMobile ? "100%" : 180 }}
           InputLabelProps={{ shrink: true }}
         />
         <TextField
@@ -158,7 +137,7 @@ const LogsReports = () => {
           name="endDate"
           value={filters.endDate}
           onChange={handleFilterChange}
-          sx={{ width: 180 }}
+          sx={{ width: isMobile ? "100%" : 180 }}
           InputLabelProps={{ shrink: true }}
         />
         <TextField
@@ -166,16 +145,9 @@ const LogsReports = () => {
           name="itemId"
           value={filters.itemId}
           onChange={handleFilterChange}
-          sx={{ width: 180 }}
+          sx={{ width: isMobile ? "100%" : 180 }}
         />
-        <TextField
-          label="User ID"
-          name="userId"
-          value={filters.userId}
-          onChange={handleFilterChange}
-          sx={{ width: 180 }}
-        />
-        <FormControl sx={{ width: 200 }}>
+        <FormControl sx={{ width: isMobile ? "100%" : 200 }}>
           <InputLabel>Action Type</InputLabel>
           <Select
             name="actionType"
@@ -199,54 +171,48 @@ const LogsReports = () => {
 
       <TableContainer
         component={Paper}
-        sx={{ borderRadius: "12px", boxShadow: 3 }}
+        sx={{ borderRadius: "12px", boxShadow: 3, overflowX: "auto" }}
       >
-        <Table>
+        <Table
+          size={isMobile ? "small" : "medium"}
+          sx={{ display: isMobile ? "block" : "table" }}
+        >
           <TableHead>
             <TableRow>
-              {[
-                "ID",
-                "User",
-                "Action",
-                "Item",
-                "Zone",
-                "Timestamp",
-                "Actions",
-              ].map((header) => (
-                <TableCell
-                  key={header}
-                  sx={{
-                    fontWeight: "bold",
-                    bgcolor: "primary.light",
-                    color: "white",
-                  }}
-                >
-                  {header}
-                </TableCell>
-              ))}
+              {["User", "Action", "Item", "Zone", "Timestamp", "Actions"].map(
+                (header) => (
+                  <TableCell
+                    key={header}
+                    sx={{
+                      fontWeight: "bold",
+                      bgcolor: "primary.light",
+                      color: "white",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                )
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {logs.map((log) => (
               <TableRow key={log.id} hover>
-                <TableCell>{log.id}</TableCell>
                 <TableCell>{log.user}</TableCell>
                 <TableCell>{log.action}</TableCell>
                 <TableCell>{log.item}</TableCell>
                 <TableCell>{log.zone}</TableCell>
-                <TableCell>{log.timestamp}</TableCell>
+                <TableCell>
+                  {new Date(log.timestamp).toLocaleString()}
+                </TableCell>
                 <TableCell>
                   <Tooltip title="View">
-                    <IconButton sx={{ borderRadius: "8px", p: 1 }}>
-                      <Visibility />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
                     <IconButton
-                      sx={{ borderRadius: "8px", p: 1, color: "error.main" }}
-                      onClick={() => handleDeleteLog(log.id)}
+                      sx={{ borderRadius: "8px", p: 1 }}
+                      onClick={() => handleView(log)}
                     >
-                      <Delete />
+                      <Visibility />
                     </IconButton>
                   </Tooltip>
                 </TableCell>
@@ -255,6 +221,25 @@ const LogsReports = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog open={openViewDialog} onClose={() => setOpenViewDialog(false)}>
+        <DialogTitle>Log Details</DialogTitle>
+        <DialogContent>
+          {selectedLog && (
+            <DialogContentText>
+              <strong>User:</strong> {selectedLog.user} <br />
+              <strong>Action:</strong> {selectedLog.action} <br />
+              <strong>Item:</strong> {selectedLog.item} <br />
+              <strong>Zone:</strong> {selectedLog.zone} <br />
+              <strong>Timestamp:</strong>{" "}
+              {new Date(selectedLog.timestamp).toLocaleString()} <br />
+            </DialogContentText>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenViewDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
