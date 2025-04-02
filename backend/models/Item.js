@@ -1,23 +1,3 @@
-// const mongoose = require("mongoose");
-
-// const ItemSchema = new mongoose.Schema({
-//   itemId: String,
-//   name: String,
-//   width: Number,
-//   depth: Number,
-//   height: Number,
-//   mass: Number,
-//   priority: Number,
-//   expiryDate: String,
-//   usageLimit: Number,
-//   preferredZone: String,
-// });
-
-// module.exports = mongoose.model("Item", ItemSchema);
-
-
-
-
 const mongoose = require('mongoose');
 
 const itemSchema = new mongoose.Schema({
@@ -28,7 +8,7 @@ const itemSchema = new mongoose.Schema({
   height: { type: Number, required: true },
   mass: { type: Number, required: true },
   priority: { type: Number, min: 1, max: 100 },
-  expiryDate: { type: Date },
+  expiryDate: { type: String }, // Changed from Date to String for easier handling
   usageLimit: { type: Number },
   preferredZone: { type: String },
   createdAt: { type: Date, default: Date.now }

@@ -44,52 +44,56 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 
-// Add these new routes at the bottom, before module.exports
+
+
 const isExpired = (expiryDate) => {
-  if (!expiryDate) return false;
+  if (!expiryDate || expiryDate === "N/A") return false;
   
-  const [year, month, day] = expiryDate.split('/');
-  const expiry = new Date(year, month - 1, day); // month is 0-indexed
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  return expiry < today;
+  try {
+    const [day, month, year] = expiryDate.split('/');
+    const expiry = new Date(`${year}-${month}-${day}`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return expiry < today;
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return false;
+  }
 };
 
-// Get expired items
+// Get all expired items
 router.get('/waste', async (req, res) => {
   try {
     const items = await Item.find({});
-    
-    // Always return an array, even if empty
-    const wasteItems = items.filter(item => isExpired(item.expiryDate))
+    const wasteItems = items
+      .filter(item => isExpired(item.expiryDate))
       .map(item => ({
-        id: item._id.toString(),
+        id: item._id,
         itemId: item.itemId,
-        containerId: item.preferredZone || 'Unassigned',
-        itemname: item.name,
-        ExpDate: item.expiryDate,
-        reason: 'Expired'
+        name: item.name,
+        expiryDate: item.expiryDate,
+        preferredZone: item.preferredZone || 'Unassigned'
       }));
 
-    // Ensure we always return an array
-    res.status(200).json(Array.isArray(wasteItems) ? wasteItems : []);
-    
+    res.status(200).json(wasteItems);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json([]); // Return empty array on error
+    res.status(500).json({ error: 'Failed to fetch expired items' });
   }
 });
 
-// Delete endpoint remains the same
+// Delete expired item
 router.delete('/waste/:id', async (req, res) => {
   try {
-    await Item.findByIdAndDelete(req.params.id);
-    res.status(200).json({ success: true });
+    const deletedItem = await Item.findByIdAndDelete(req.params.id);
+    if (!deletedItem) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+    res.status(200).json({ message: 'Item deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Delete failed' });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Failed to delete item' });
   }
 });
-
 
 module.exports = router;
