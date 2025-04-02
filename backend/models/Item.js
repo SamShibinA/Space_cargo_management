@@ -12,6 +12,7 @@ const itemSchema = new mongoose.Schema({
   usageLimit: { type: Number },
   preferredZone: { type: String },
   createdAt: { type: Date, default: Date.now }
+  
 });
 
 module.exports = mongoose.model('Item', itemSchema);

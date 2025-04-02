@@ -8,7 +8,7 @@ import StorageIcon from "@mui/icons-material/Storage";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import ImportExportIcon from "@mui/icons-material/ImportExport";
+
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 
 const drawerWidth = 240;
@@ -19,7 +19,7 @@ const NAVIGATION = [
   { title: "Rearrangement Optimization", icon: <SwapHorizIcon />, path: "/rearrangement" },
   { title: "Waste Management", icon: <DeleteIcon />, path: "/waste-management" },
   { title: "Logs & Reports", icon: <ListAltIcon />, path: "/logs-reports" },
-  { title: "Import/Export", icon: <ImportExportIcon />, path: "/import-export" },
+
   { title: "Admin Panel", icon: <AdminPanelSettingsIcon />, path: "/admin-panel" },
 ];
 

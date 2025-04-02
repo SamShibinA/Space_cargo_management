@@ -7,7 +7,6 @@ import CargoPlacement from "./pages/CargoPlacement";
 import Rearrangement from "./pages/Rearrangement";
 import WasteManagement from "./pages/WasteManagement";
 import LogsReports from "./pages/LogsReports";
-import ImportExport from "./pages/ImportExport";
 import AdminPanel from "./pages/AdminPanel";
 import StorageZones from "./components/StorageZones";
 import ZoneDetails from "./components/ZoneDetails";
@@ -48,7 +47,6 @@ const App = () => {
                 <Route path="/rearrangement" element={<Rearrangement />} />
                 <Route path="/waste-management" element={<WasteManagement />} />
                 <Route path="/logs-reports" element={<LogsReports />} />
-                <Route path="/import-export" element={<ImportExport />} />
                 <Route path="/admin-panel" element={<AdminPanel />} />
 
                 {/* Storage Zones */}
