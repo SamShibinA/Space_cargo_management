@@ -225,7 +225,7 @@ const Dashboard = () => {
           </Button>
         )}
       </Paper>
-
+      
       {zones.length === 0 ? (
         <Paper sx={{ p: 3, textAlign: 'center' }}>
           <Typography>No storage zones found</Typography>
