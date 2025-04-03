@@ -8,6 +8,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import { ThemeContext } from '../App';
 import ZoneProgress from '../components/ZoneProgress';
+import { fetchDashboardData } from '../api/dashboardApi';
 
 const Dashboard = () => {
   const { darkMode } = useContext(ThemeContext);
@@ -23,37 +24,6 @@ const Dashboard = () => {
     searchResults: []
   });
 
-  // Dummy data - replace with your actual data fetching
-  const baseData = {
-    zones: [
-      {
-        _id: '1',
-        zoneId: '1',
-        zoneName: 'Main Storage',
-        containerId: 'STG-001',
-        dimensions: { width: 200, depth: 150, height: 250 },
-        totalVolume: 200 * 150 * 250,
-        items: [
-          { _id: '101', itemId: 'ITM-101', name: 'Oxygen Tank', width: 30, depth: 30, height: 60, expiryDate: '15/06/2023' },
-          { _id: '102', itemId: 'ITM-102', name: 'Food Package', width: 20, depth: 20, height: 10, expiryDate: '30/09/2023' },
-          { _id: '103', itemId: 'ITM-103', name: 'Tool Kit', width: 40, depth: 20, height: 15, expiryDate: 'N/A' }
-        ]
-      },
-      {
-        _id: '2',
-        zoneId: '2',
-        zoneName: 'Cold Storage',
-        containerId: 'STG-002',
-        dimensions: { width: 150, depth: 100, height: 200 },
-        totalVolume: 150 * 100 * 200,
-        items: [
-          { _id: '201', itemId: 'ITM-201', name: 'Vaccine A', width: 100, depth: 100, height: 15, expiryDate: '01/07/2026' },
-          { _id: '202', itemId: 'ITM-202', name: 'Vaccine B', width: 10, depth: 10, height: 15, expiryDate: '15/08/2025' }
-        ]
-      }
-    ]
-  };
-
   const isExpired = (expiryDate, referenceDate = new Date()) => {
     if (!expiryDate || expiryDate === "N/A") return false;
     try {
@@ -66,52 +36,25 @@ const Dashboard = () => {
     }
   };
 
-  const processZoneData = (zones, daysForward = 0) => {
-    const simulationDate = new Date();
-    simulationDate.setDate(simulationDate.getDate() + daysForward);
-
-    return zones.map(zone => {
-      const expiredItems = zone.items.filter(item => isExpired(item.expiryDate, simulationDate));
-      const activeItems = zone.items.filter(item => !isExpired(item.expiryDate, simulationDate));
-      const usedVolume = activeItems.reduce((sum, item) => sum + (item.width * item.depth * item.height), 0);
-      
-      return {
-        ...zone,
-        usedVolume,
-        availableVolume: zone.totalVolume - usedVolume,
-        utilization: zone.totalVolume > 0 ? (usedVolume / zone.totalVolume) * 100 : 0,
-        activeItems,
-        activeItemCount: activeItems.length,
-        expiredItems,
-        expiredItemCount: expiredItems.length,
-        lastUpdated: new Date().toISOString(),
-        ...(daysForward > 0 && { simulationDate: simulationDate.toISOString() })
-      };
-    });
-  };
-
-  const loadData = (daysForward = 0) => {
+  const loadData = async (daysForward = 0) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Simulate API call delay
-      setTimeout(() => {
-        const processedZones = processZoneData(baseData.zones, daysForward);
-        
-        setState(prev => ({
-          ...prev,
-          zones: processedZones,
-          selectedZone: processedZones.find(z => z.zoneId === prev.selectedZone?.zoneId) || processedZones[0],
-          isLoading: false,
-          isSimulating: daysForward > 0,
-          searchResults: [] // Clear search results on new simulation
-        }));
-      }, 500);
+      const data = await fetchDashboardData(daysForward);
+      
+      setState(prev => ({
+        ...prev,
+        zones: data.zones,
+        selectedZone: data.zones.find(z => z.zoneId === prev.selectedZone?.zoneId) || data.zones[0],
+        isLoading: false,
+        isSimulating: daysForward > 0,
+        searchResults: [] // Clear search results on new simulation
+      }));
     } catch (error) {
       setState(prev => ({
         ...prev,
         isLoading: false,
-        error: error.message
+        error: error.message || 'Failed to load data'
       }));
     }
   };

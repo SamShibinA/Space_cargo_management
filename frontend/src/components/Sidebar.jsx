@@ -9,7 +9,6 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 
 const drawerWidth = 240;
 
@@ -20,7 +19,6 @@ const NAVIGATION = [
   { title: "Waste Management", icon: <DeleteIcon />, path: "/waste-management" },
   { title: "Logs & Reports", icon: <ListAltIcon />, path: "/logs-reports" },
 
-  { title: "Admin Panel", icon: <AdminPanelSettingsIcon />, path: "/admin-panel" },
 ];
 
 export default function Sidebar({ open, toggleDrawer }) {
