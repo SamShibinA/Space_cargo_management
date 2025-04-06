@@ -1,21 +1,15 @@
 services:
-  backend:
-    build: ./backend
+  app:
+    build:
+      context: .
     ports:
       - "8000:8000"
+    volumes:
+      - ./mongo-data:/data/db
     depends_on:
       - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017/cargo-db
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "5173:5173"
-    depends_on:
-      - backend
-    stdin_open: true
-    tty: true
 
   mongo:
     image: mongo
