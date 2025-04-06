@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 
 const zoneRoutes = require("./routes/zoneRoutes");
 const itemRoutes = require("./routes/itemRoutes");
@@ -28,6 +29,12 @@ app.use("/api/zones", zoneRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/logs", logRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
